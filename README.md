@@ -4,3 +4,5 @@ Site tamamen local çalışır yani arşivlediğiniz ya da siteden çık gir yap
 bir lisansı veya birşeyi yoktur istediğiniz gibi kullanabilirsiniz, mesela ben bunu mobile app'ime bağlayacağım.
 
 (Font, icon/emoji gibi şeyleri başka urllerden çekiyordur bilginize)
+
+https://binbontrr.github.io/todo-kronometre/
