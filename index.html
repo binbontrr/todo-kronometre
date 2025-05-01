@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kronometre ve Yapılacaklar</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⌚</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <button id="themeToggle" class="theme-toggle">🕶️</button>
+    <div class="container">
+        <div class="timer-section">
+            <div class="timer-display">00:00:00</div>
+            <div class="timer-controls">
+                <button id="startBtn" class="btn">Başlat</button>
+                <button id="stopBtn" class="btn">Durdur</button>
+                <button id="resetBtn" class="btn">Sıfırla</button>
+            </div>
+        </div>
+
+        <div class="todo-section">
+            <div class="todo-header">
+                <h2>Bugünkü Görevler</h2>
+                <button id="archiveBtn" class="btn btn-secondary">Tümünü Arşivle</button>
+            </div>
+            <div class="todo-input">
+                <input type="text" id="todoInput" placeholder="Yeni görev ekle...">
+                <button id="addTodo" class="btn">Ekle</button>
+            </div>
+            <ul id="todoList" class="todo-list"></ul>
+        </div>
+
+        <div class="old-todos-section">
+            <div class="old-todos-header">
+                <h2>Geçmiş Görevler</h2>
+                <button id="toggleHistoryBtn" class="btn btn-secondary">
+                    <span class="show-text">Geçmişi Göster</span>
+                    <span class="hide-text">Geçmişi Gizle</span>
+                </button>
+            </div>
+            <div id="oldTodosContainer" class="old-todos-container hidden"></div>
+        </div>
+    </div>
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>Başarılı!</h3>
+                <button class="popup-close">&times;</button>
+            </div>
+            <div class="popup-body">
+                <p>Tüm görevler başarıyla arşivlendi!</p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
