@@ -78,11 +78,30 @@ function formatTime(ms) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
+function getTimerColorClass(ms) {
+    const hours = ms / 3600000;
+    if (hours < 2) return 'timer-blue';
+    if (hours < 4) return 'timer-green';
+    if (hours < 8) return 'timer-orange';
+    if (hours < 10) return 'timer-red';
+    if (hours >= 10) return 'timer-purple';
+    return '';
+}
+
+function updateTimerColorClass(element, ms) {
+    const colorClasses = ['timer-blue', 'timer-green', 'timer-orange', 'timer-red', 'timer-purple'];
+    element.classList.remove(...colorClasses);
+    const colorClass = getTimerColorClass(ms);
+    if (colorClass) element.classList.add(colorClass);
+}
+
+
 function startTimer() {
     startTime = Date.now() - elapsedTime;
     timerInterval = setInterval(() => {
         elapsedTime = Date.now() - startTime;
         timerDisplay.textContent = formatTime(elapsedTime);
+        updateTimerColorClass(timerDisplay, elapsedTime);   
         saveTimer(); 
     }, 10);
     
@@ -99,6 +118,7 @@ function startTimer() {
     });
 }
 
+
 function stopTimer() {
     clearInterval(timerInterval);
     startBtn.disabled = false;
@@ -111,6 +131,7 @@ function resetTimer() {
     clearInterval(timerInterval);
     elapsedTime = 0;
     timerDisplay.textContent = '00:00:00';
+    updateTimerColorClass(timerDisplay, 0);
     startBtn.disabled = false;
     stopBtn.disabled = false;
     timerDisplay.classList.remove('active');
@@ -190,7 +211,8 @@ function loadTodos() {
         if (stored.timerHistory[date]) {
             const timerDiv = document.createElement('div');
             timerDiv.className = 'old-todo-timer';
-            timerDiv.textContent = `⏱️ ${stored.timerHistory[date].formattedTime}`;
+            timerDiv.textContent = `\u23f1\ufe0f ${stored.timerHistory[date].formattedTime}`;
+            updateTimerColorClass(timerDiv, stored.timerHistory[date].time);
             dateDiv.appendChild(timerDiv);
         }
         
@@ -345,6 +367,9 @@ function loadTimer() {
     if (stored.timerHistory[today]) {
         elapsedTime = stored.timerHistory[today].time;
         timerDisplay.textContent = stored.timerHistory[today].formattedTime;
+        updateTimerColorClass(timerDisplay, elapsedTime);
+    } else {
+        updateTimerColorClass(timerDisplay, 0);
     }
 }
 
