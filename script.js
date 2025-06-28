@@ -114,7 +114,14 @@ function createTodoElement(todo, isHistory = false, dateKey = null, todoIndex = 
     checkbox.checked = todo.completed;
     checkbox.addEventListener('change', () => {
         li.classList.toggle('completed');
-        if (!isHistory) localStorage.setItem('todos', JSON.stringify(JSON.parse(localStorage.getItem('todos'))));
+        if (!isHistory) {
+            let stored = JSON.parse(localStorage.getItem('todos'));
+            let idx = stored.current.findIndex(t => t.text === todo.text && t.note === todo.note);
+            if (idx !== -1) {
+                stored.current[idx].completed = checkbox.checked;
+                localStorage.setItem('todos', JSON.stringify(stored));
+            }
+        }
     });
 
     const span = document.createElement('span');
