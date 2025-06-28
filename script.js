@@ -32,44 +32,6 @@ function formatDate(dateString) {
     });
 }
 
-function getStoredTodos() {
-    const stored = localStorage.getItem('todos');
-    if (!stored) {
-        return {
-            current: [],
-            history: {},
-            timerHistory: {}
-        };
-    }
-    const parsed = JSON.parse(stored);
-    return {
-        current: parsed.current || [],
-        history: parsed.history || {},
-        timerHistory: parsed.timerHistory || {}
-    };
-}
-
-function saveTodos() {
-    const stored = getStoredTodos();
-    const todos = {
-        current: getCurrentTodos(),
-        history: stored.history,
-        timerHistory: stored.timerHistory
-    };
-    localStorage.setItem('todos', JSON.stringify(todos));
-}
-
-function getCurrentTodos() {
-    const todos = [];
-    todoList.querySelectorAll('.todo-item').forEach(item => {
-        todos.push({
-            text: item.querySelector('span').textContent,
-            completed: item.classList.contains('completed')
-        });
-    });
-    return todos;
-}
-
 function formatTime(ms) {
     const hours = Math.floor(ms / 3600000);
     const minutes = Math.floor((ms % 3600000) / 60000);
@@ -95,7 +57,6 @@ function updateTimerColorClass(element, ms) {
     if (colorClass) element.classList.add(colorClass);
 }
 
-
 function startTimer() {
     startTime = Date.now() - elapsedTime;
     timerInterval = setInterval(() => {
@@ -118,7 +79,6 @@ function startTimer() {
     });
 }
 
-
 function stopTimer() {
     clearInterval(timerInterval);
     startBtn.disabled = false;
@@ -135,39 +95,172 @@ function resetTimer() {
     startBtn.disabled = false;
     stopBtn.disabled = false;
     timerDisplay.classList.remove('active');
+    const stored = JSON.parse(localStorage.getItem('todos'));
+    const today = getTodayString();
+    if (stored.timerHistory[today]) {
+        delete stored.timerHistory[today];
+        localStorage.setItem('todos', JSON.stringify(stored));
+    }
     saveTimer();
 }
 
-function createTodoElement(todo, isHistory = false) {
+function createTodoElement(todo, isHistory = false, dateKey = null, todoIndex = null) {
     const li = document.createElement('li');
     li.className = isHistory ? 'old-todo-item' : 'todo-item';
     if (todo.completed) li.classList.add('completed');
-    
+
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.checked = todo.completed;
     checkbox.addEventListener('change', () => {
         li.classList.toggle('completed');
-        if (!isHistory) saveTodos();
+        if (!isHistory) localStorage.setItem('todos', JSON.stringify(JSON.parse(localStorage.getItem('todos'))));
     });
-    
+
     const span = document.createElement('span');
     span.textContent = todo.text;
-    
+    span.style.cursor = 'pointer';
+
+    if (!isHistory) {
+        span.addEventListener('click', () => {
+            const input = document.createElement('textarea');
+            input.value = todo.note || '';
+            input.className = 'note-textarea';
+
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Kaydet';
+            saveBtn.className = 'note-save-btn';
+
+            const popupBg = document.createElement('div');
+            popupBg.className = 'popup-bg';
+
+            const popupBox = document.createElement('div');
+            popupBox.className = 'popup-box';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.className = 'popup-close-btn';
+            closeBtn.onclick = () => document.body.removeChild(popupBg);
+            popupBox.appendChild(closeBtn);
+
+            popupBox.appendChild(input);
+            popupBox.appendChild(saveBtn);
+            popupBg.appendChild(popupBox);
+            document.body.appendChild(popupBg);
+
+            saveBtn.onclick = () => {
+                todo.note = input.value;
+                let stored = JSON.parse(localStorage.getItem('todos'));
+                let idx = stored.current.findIndex(t => t.text === todo.text && t.completed === todo.completed);
+                if (idx !== -1) {
+                    stored.current[idx].note = input.value;
+                    localStorage.setItem('todos', JSON.stringify(stored));
+                }
+                localStorage.setItem('todos', JSON.stringify(JSON.parse(localStorage.getItem('todos'))));
+                document.body.removeChild(popupBg);
+            };
+
+            popupBg.onclick = e => {
+                if (e.target === popupBg) document.body.removeChild(popupBg);
+            };
+        });
+    } else {
+        if (todo.note && todo.note.trim() !== '') {
+            const noteDiv = document.createElement('div');
+            noteDiv.className = 'todo-note-tooltip';
+            noteDiv.textContent = todo.note;
+            noteDiv.style.display = 'none';
+            noteDiv.style.position = 'fixed';
+            noteDiv.style.pointerEvents = 'none';
+            noteDiv.style.background = '#23232b';
+            noteDiv.style.color = '#fff';
+            noteDiv.style.padding = '8px 14px';
+            noteDiv.style.borderRadius = '8px';
+            noteDiv.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
+            noteDiv.style.maxWidth = '250px';
+            noteDiv.style.whiteSpace = 'pre-wrap';
+            noteDiv.style.zIndex = '9999';
+            noteDiv.style.fontSize = '0.96em';
+            noteDiv.style.opacity = '0.98';
+
+            document.body.appendChild(noteDiv);
+            span.addEventListener('mouseenter', (e) => {
+                noteDiv.style.display = 'block';
+            });
+            span.addEventListener('mousemove', (e) => {
+                noteDiv.style.left = (e.clientX - 15) + 'px';
+                noteDiv.style.top = (e.clientY + 10) + 'px';
+            });
+            span.addEventListener('mouseleave', () => {
+                noteDiv.style.display = 'none';
+            });
+            li.addEventListener('mouseleave', () => {
+                noteDiv.style.display = 'none';
+            });
+        }
+    }
+
     li.appendChild(checkbox);
     li.appendChild(span);
-    
+
     if (!isHistory) {
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.textContent = 'Sil';
-        deleteBtn.addEventListener('click', () => {
-            li.remove();
-            saveTodos();
-        });
+        deleteBtn.onclick = () => {
+            const popupBg = document.createElement('div');
+            popupBg.className = 'popup-bg';
+            const popupBox = document.createElement('div');
+            popupBox.className = 'popup-box';
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.className = 'popup-close-btn';
+            closeBtn.onclick = () => document.body.removeChild(popupBg);
+            popupBox.appendChild(closeBtn);
+            const icon = document.createElement('div');
+            icon.innerHTML = '&#x26A0;';
+            icon.style.fontSize = '2em';
+            icon.style.textAlign = 'center';
+            popupBox.appendChild(icon);
+            const title = document.createElement('h3');
+            title.textContent = 'Görevi silmek istediğinize emin misiniz?';
+            title.style.textAlign = 'center';
+            popupBox.appendChild(title);
+            const msg = document.createElement('p');
+            msg.textContent = 'Bu görev kalıcı olarak silinecek.';
+            msg.style.textAlign = 'center';
+            popupBox.appendChild(msg);
+            const btnRow = document.createElement('div');
+            btnRow.style.display = 'flex';
+            btnRow.style.gap = '10px';
+            btnRow.style.margin = '18px 0 0 0';
+            btnRow.style.justifyContent = 'center';
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Sil';
+            confirmBtn.className = 'note-save-btn';
+            confirmBtn.style.background = '#ff3b30';
+            confirmBtn.onclick = () => {
+                let stored = JSON.parse(localStorage.getItem('todos'));
+                stored.current = stored.current.filter(t => !(t.text === todo.text && t.completed === todo.completed && (t.note || '') === (todo.note || '')));
+                localStorage.setItem('todos', JSON.stringify(stored));
+                li.remove();
+                localStorage.setItem('todos', JSON.stringify(JSON.parse(localStorage.getItem('todos'))));
+                document.body.removeChild(popupBg);
+            };
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Vazgeç';
+            cancelBtn.className = 'note-save-btn';
+            cancelBtn.onclick = () => document.body.removeChild(popupBg);
+            btnRow.appendChild(confirmBtn);
+            btnRow.appendChild(cancelBtn);
+            popupBox.appendChild(btnRow);
+            popupBg.appendChild(popupBox);
+            popupBg.onclick = e => { if (e.target === popupBg) document.body.removeChild(popupBg); };
+            document.body.appendChild(popupBg);
+        };
         li.appendChild(deleteBtn);
     }
-    
+
     return li;
 }
 
@@ -177,17 +270,22 @@ function addTodo() {
 
     const todo = {
         text: todoText,
-        completed: false
+        completed: false,
+        note: ''
     };
+
+    let stored = JSON.parse(localStorage.getItem('todos'));
+    stored.current.push(todo);
+    localStorage.setItem('todos', JSON.stringify(stored));
 
     const li = createTodoElement(todo);
     todoList.appendChild(li);
     todoInput.value = '';
-    saveTodos();
+    localStorage.setItem('todos', JSON.stringify(JSON.parse(localStorage.getItem('todos'))));
 }
 
 function loadTodos() {
-    const stored = getStoredTodos();
+    const stored = JSON.parse(localStorage.getItem('todos'));
     const today = getTodayString();
 
     todoList.innerHTML = '';
@@ -198,7 +296,7 @@ function loadTodos() {
     oldTodosContainer.innerHTML = '';
 
     const sortedDates = Object.keys(stored.history)
-        .sort((a, b) => new Date(b) - new Date(a));
+        .sort((a, b) => new Date(b.split('_')[0]) - new Date(a.split('_')[0]) || b.localeCompare(a));
     
     sortedDates.forEach(date => {
         const card = document.createElement('div');
@@ -206,12 +304,22 @@ function loadTodos() {
         
         const dateDiv = document.createElement('div');
         dateDiv.className = 'old-todo-date';
-        dateDiv.textContent = formatDate(date);
+
+        let displayDate = date;
+        let displayTime = '';
+        if (date.includes('_')) {
+            const [d, t] = date.split('_');
+            displayDate = d;
+            if (t && t.length === 6) {
+                displayTime = ' ' + t.slice(0,2) + ':' + t.slice(2,4) + ':' + t.slice(4,6);
+            }
+        }
+        dateDiv.textContent = formatDate(displayDate) + displayTime;
 
         if (stored.timerHistory[date]) {
             const timerDiv = document.createElement('div');
             timerDiv.className = 'old-todo-timer';
-            timerDiv.textContent = `\u23f1\ufe0f ${stored.timerHistory[date].formattedTime}`;
+            timerDiv.textContent = '⏱️ ' + stored.timerHistory[date].formattedTime;
             updateTimerColorClass(timerDiv, stored.timerHistory[date].time);
             dateDiv.appendChild(timerDiv);
         }
@@ -219,15 +327,51 @@ function loadTodos() {
         const itemsList = document.createElement('ul');
         itemsList.className = 'old-todo-items';
         
-        stored.history[date].forEach(todo => {
-            itemsList.appendChild(createTodoElement(todo, true));
+        stored.history[date].forEach((todo, idx) => {
+            itemsList.appendChild(createTodoElement(todo, true, date, idx));
         });
         
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-card-btn';
         deleteBtn.textContent = 'Sil';
-        deleteBtn.addEventListener('click', () => {
-            if (confirm('Bu günün tüm görevlerini ve kronometre verisini silmek istediğinize emin misiniz?')) {
+        deleteBtn.onclick = () => {
+            const popupBg = document.createElement('div');
+            popupBg.className = 'popup-bg';
+            const popupBox = document.createElement('div');
+            popupBox.className = 'popup-box';
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.className = 'popup-close-btn';
+            closeBtn.onclick = () => document.body.removeChild(popupBg);
+            popupBox.appendChild(closeBtn);
+            
+            const icon = document.createElement('div');
+            icon.innerHTML = '&#x26A0;';
+            icon.style.fontSize = '2em';
+            icon.style.textAlign = 'center';
+            popupBox.appendChild(icon);
+            
+            const title = document.createElement('h3');
+            title.textContent = 'Silmek istediğinize emin misiniz?';
+            title.style.textAlign = 'center';
+            popupBox.appendChild(title);
+            
+            const msg = document.createElement('p');
+            msg.textContent = 'Bu günün tüm görevleri ve kronometre verisi kalıcı olarak silinecek.';
+            msg.style.textAlign = 'center';
+            popupBox.appendChild(msg);
+
+            const btnRow = document.createElement('div');
+            btnRow.style.display = 'flex';
+            btnRow.style.gap = '10px';
+            btnRow.style.margin = '18px 0 0 0';
+            btnRow.style.justifyContent = 'center';
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Sil';
+            confirmBtn.className = 'note-save-btn';
+            confirmBtn.style.background = '#ff3b30';
+            confirmBtn.onclick = () => {
                 delete stored.history[date];
                 delete stored.timerHistory[date];
                 localStorage.setItem('todos', JSON.stringify({
@@ -236,33 +380,25 @@ function loadTodos() {
                     timerHistory: stored.timerHistory
                 }));
                 loadTodos();
-            }
-        });
+                document.body.removeChild(popupBg);
+            };
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Vazgeç';
+            cancelBtn.className = 'note-save-btn';
+            cancelBtn.onclick = () => document.body.removeChild(popupBg);
+            btnRow.appendChild(confirmBtn);
+            btnRow.appendChild(cancelBtn);
+            popupBox.appendChild(btnRow);
+            popupBg.appendChild(popupBox);
+            popupBg.onclick = e => { if (e.target === popupBg) document.body.removeChild(popupBg); };
+            document.body.appendChild(popupBg);
+        };
         
         card.appendChild(dateDiv);
         card.appendChild(itemsList);
         card.appendChild(deleteBtn);
         oldTodosContainer.appendChild(card);
     });
-}
-
-function checkAndMoveOldTodos() {
-    const { current, history } = getStoredTodos();
-    const today = getTodayString();
-    
-    if (history[today] && current.length === 0) {
-        current.push(...history[today]);
-        delete history[today];
-    }
-
-    if (current.length > 0) {
-        history[today] = current;
-    }
-    
-    localStorage.setItem('todos', JSON.stringify({
-        current: [],
-        history: history
-    }));
 }
 
 function showPopup(title, message) {
@@ -279,26 +415,30 @@ popupClose.addEventListener('click', () => {
 });
 
 function archiveCurrentTodos() {
-    const stored = getStoredTodos();
+    const stored = JSON.parse(localStorage.getItem('todos'));
     const today = getTodayString();
-    
+    const now = new Date();
+    const uniqueKey = today + '_' + now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0') + now.getSeconds().toString().padStart(2, '0');
+
+    const newHistory = { ...stored.history };
     if (stored.current.length > 0) {
-        stored.history[today] = stored.current;
+        newHistory[uniqueKey] = [...stored.current];
     }
-    
+
+    const newTimerHistory = { ...stored.timerHistory };
     if (elapsedTime > 0) {
-        stored.timerHistory[today] = {
+        newTimerHistory[uniqueKey] = {
             time: elapsedTime,
             formattedTime: formatTime(elapsedTime)
         };
     }
-    
+
     localStorage.setItem('todos', JSON.stringify({
         current: [],
-        history: stored.history,
-        timerHistory: stored.timerHistory
+        history: newHistory,
+        timerHistory: newTimerHistory
     }));
-    
+
     todoList.innerHTML = '';
     resetTimer();
     loadTodos();
@@ -320,18 +460,7 @@ function toggleHistory() {
 
 startBtn.addEventListener('click', startTimer);
 stopBtn.addEventListener('click', stopTimer);
-resetBtn.addEventListener('click', resetTimer);
-addTodoBtn.addEventListener('click', addTodo);
-archiveBtn.addEventListener('click', () => {
-    const stored = getStoredTodos();
-    if (stored.current.length > 0 || elapsedTime > 0) {
-        if (confirm('Tüm görevleri ve kronometre verisini arşivlemek istediğinize emin misiniz?')) {
-            archiveCurrentTodos();
-        }
-    } else {
-        showPopup('Uyarı!', 'Arşivlenecek görev veya kronometre verisi bulunamadı.');
-    }
-});
+archiveBtn.addEventListener('click', archiveCurrentTodos);
 toggleHistoryBtn.addEventListener('click', toggleHistory);
 todoInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -361,7 +490,7 @@ themeToggle.addEventListener('click', () => {
 });
 
 function loadTimer() {
-    const stored = getStoredTodos();
+    const stored = JSON.parse(localStorage.getItem('todos'));
     const today = getTodayString();
     
     if (stored.timerHistory[today]) {
@@ -374,7 +503,7 @@ function loadTimer() {
 }
 
 function saveTimer() {
-    const stored = getStoredTodos();
+    const stored = JSON.parse(localStorage.getItem('todos'));
     const today = getTodayString();
     
     if (elapsedTime > 0) {
