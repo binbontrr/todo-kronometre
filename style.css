@@ -1,3 +1,103 @@
+.popup-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup-box {
+  position: relative;
+
+  position: relative;
+
+  background: #23232b;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  max-width: 350px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.note-textarea {
+  width: 100%;
+  min-height: 60px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-size: 1em;
+}
+
+.popup-close-btn {
+  position: absolute;
+  top: 4px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 1.7em;
+  color: #bbb;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.2s;
+}
+.popup-close-btn:hover {
+  color: #fff;
+}
+
+.note-save-btn.red {
+  background: #ff3b30;
+}
+
+.popup-box h3 {
+  margin: 16px 0 8px 0;
+  text-align: center;
+  font-size: 1.15em;
+  font-weight: 600;
+  color: #fff;
+}
+
+.popup-box p {
+  margin: 0 0 10px 0;
+  text-align: center;
+  color: #ccc;
+  font-size: 1em;
+}
+
+.note-save-btn {
+  margin: 10px 0 0 0;
+  padding: 7px 18px;
+  background: #0a84ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.todo-note-tooltip {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  background: #23232b;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  max-width: 250px;
+  white-space: pre-wrap;
+  margin-left: 12px;
+  z-index: 999;
+  font-size: 0.96em;
+  opacity: 0.98;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -97,11 +197,11 @@ body.theme-midnight {
 .container {
     background: rgba(28, 28, 30, 1);
     border-radius: 24px;
-    padding: 15px;
+    padding: 10px;
     box-sizing: border-box;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     width: 95%;
-    max-width: 800px;
+    max-width: 750px;
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -128,7 +228,6 @@ body.theme-midnight {
     text-align: center;
     margin: 10px 0;
     transition: transform 0.3s ease;
-    /* color: #ffffff;  kaldırıldı, renk JS ile atanacak */
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     letter-spacing: 0.5px;
     background: linear-gradient(45deg, #ffffff, #e0e0e0);
