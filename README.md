@@ -1,6 +1,10 @@
-Belirli uygulamaya ihtiyaç kalmadan bir to-do ve kronometre kullanmak istiyordum ve böyle birşey ortaya çıktı.
-Site tamamen local çalışır yani arşivlediğiniz ya da siteden çık gir yaptığınızda kronometrenin ve to-do listin geri gelmesi tamamen local çalışır
-
-bir lisansı veya birşeyi yoktur istediğiniz gibi kullanabilirsiniz, mesela ben bunu mobile app'ime bağlayacağım.
 
 https://binbontrr.github.io/todo-kronometre/
+
+To-do listesi ve kronometre olmasının yanı sıra görevlerinize not ekleyebildiğiniz, geçmişe arşivleyebildiğiniz ve daha fazlası. 
+
+Ayrıca hiçbir türlü veri saklama olayı yoktur, tüm herşey local storagede depolanır ve kullanılır.
+Tema geçiş özelliğinin olması.
+Görevlerinizi arşivleyip görebildiğiniz bir alan.
+Kronometre sayaçının renkli olması (ilk 2 saat mavi, 2-4 yeşil, 4-8 turuncu, 8-10 arası kırmızı, 10 ve üstü mor)
+
