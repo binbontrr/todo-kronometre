@@ -467,6 +467,7 @@ function toggleHistory() {
 
 startBtn.addEventListener('click', startTimer);
 stopBtn.addEventListener('click', stopTimer);
+resetBtn.addEventListener('click', resetTimer);
 archiveBtn.addEventListener('click', archiveCurrentTodos);
 toggleHistoryBtn.addEventListener('click', toggleHistory);
 todoInput.addEventListener('keypress', (e) => {
