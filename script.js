@@ -19,8 +19,8 @@ const popupTitle = document.querySelector('.popup-header h3');
 const popupMessage = document.querySelector('.popup-body p');
 
 function getTodayString() {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+    const t = new Date();
+    return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
 }
 
 function formatDate(dateString) {
