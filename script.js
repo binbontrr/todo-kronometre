@@ -470,6 +470,10 @@ stopBtn.addEventListener('click', stopTimer);
 resetBtn.addEventListener('click', resetTimer);
 archiveBtn.addEventListener('click', archiveCurrentTodos);
 toggleHistoryBtn.addEventListener('click', toggleHistory);
+addTodoBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    addTodo();
+});
 todoInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         addTodo();
